@@ -1,0 +1,10 @@
+/backend/node_modules/
+/backend/lib/
+.firebase/
+.dart_tool/
+/frontend/build/
+.flutter-plugins-dependencies
+.env
+.env.*
+!.env.example
+*-service-account.json

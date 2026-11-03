@@ -182,9 +182,9 @@ erDiagram
 | `users/{uid}/visits/{visitId}` | `friendUid`, `targetPetId?`, `commandId`, `createdAt`. 방문 시 첫 성체 발견과 함께 기록. |
 | `gifts/{giftId}` | `senderUid`, `recipientUid`, `itemId`, `quantity`, `commandId`, `createdAt`. 친구에게 전달한 이력. |
 | `proposals/{proposalId}` | `senderUid`, `recipientUid`, `senderPetId`, `recipientPetId`, `status`, `familyId?`, `commandId`, `createdAt`, `resolvedAt?`. |
-| `pendingProposalKeys/{pairKey}` | 정렬된 두 반려동물 ID의 키와 `proposalId`. 같은 개체 쌍에 대기 청혼 하나만 허용하기 위한 문서. 처리 완료 때 해제. |
+| `pendingProposalKeys/{pairKey}` | 정렬된 두 반려동물의 전체 문서 경로를 JSON 배열로 직렬화해 SHA-256으로 해시한 키와 `proposalId`. 같은 개체 쌍에 대기 청혼 하나만 허용하기 위한 문서. 처리 완료 때 해제. |
 | `families/{familyId}` | `proposalId`, `parentPetAId`, `parentPetBId`, `parentUserAUid`, `parentUserBUid`, `createdAt`. 새 알 문서가 `familyId`를 참조. |
-| `users/{uid}/discoveries/{speciesId}` | `source`, `firstPetId`, `firstDiscoveredAt`. 사용자·종당 첫 발견만 저장. |
+| `users/{uid}/discoveries/{speciesId}` | `source`, `firstPetId`, `firstOwnerUid`, `firstDiscoveredAt`. 사용자·종당 첫 발견만 저장. |
 | `users/{uid}/notifications/{notificationId}` | `type`, `title`, `body`, `targetType?`, `targetId?`, `createdAt`, `readAt?`. 알림함과 읽음 상태. |
 | `notificationOutbox/{eventId}` | `notificationId`, `recipientUid`, `status`, `attempts`, `nextAttemptAt`, `createdAt`. 푸시 발송 대상과 재시도 상태. |
 | `idempotency/{requestKey}` | 사용자·메서드·경로·키 해시, `bodyHash`, 성공 응답, 만료 시각. 제안 보관 기간 72시간. 만료 응답과 장기 중복 방지는 분리. |
@@ -214,3 +214,12 @@ erDiagram
 - 도감: 초기 소규모 종 목록과 사용자 발견 목록을 서버에서 결합해 정렬·필터한다. 종 수가 커지면 조회 모델을 재설계한다.
 - 청혼·선물 이력: 참여 사용자 및 상태·생성 시각의 조회 패턴에 맞춰 필요한 복합 인덱스를 추가한다.
 - 일자별 집계·사용자 문서가 자주 갱신되면 경합과 비용을 측정하고 동기화 주기 및 쓰기 횟수를 조정한다.
+
+## 구현 검토와 보완 사항
+
+- 사용자별 소유 경계, 걸음 중복 보상 방지, 포인트 원장, 청혼 유일성과 알림 outbox를 구분했다. Firestore는 외래 키와 유일성을 강제하지 않으므로 업무 API에서 권한 검사와 트랜잭션을 구현해야 한다.
+- 반려동물 ID는 사용자별 경로에서만 고유하다. 청혼 중복 키는 소유자를 포함한 전체 경로 두 개로 만든다. 가족과 도감의 첫 발견도 소유자와 개체 ID를 함께 보관한다.
+- `readAt`은 읽지 않은 경우 필드 누락이 아닌 명시적 `null`로 저장한다. 다른 nullable 필드도 [모델](../backend/src/models.ts)의 계약을 따른다.
+- 알림·청혼·친구·outbox의 예상 조회에 대한 복합 인덱스를 추가했다. 실제 쿼리와 페이지네이션을 구현한 후 필요한 인덱스를 검증해야 한다.
+- 게임 규칙과 보존 정책은 미확정이며 기본 종, 성장 규칙, 가격과 사용자 데이터는 임의로 채우지 않는다. `idempotency`의 만료 처리와 TTL은 별도로 구현해야 한다.
+- 모델은 저장 문서의 TypeScript 타입이며 런타임 검증이나 API DTO가 아니다. 데이터 유효성, 상태 전이와 소유권은 후속 서버 구현에서 검증한다. 실행법은 [Firestore 설정](firestore-setup.md)을 참고한다.

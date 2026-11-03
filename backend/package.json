@@ -1,0 +1,13 @@
+{
+  "name": "pocketwalk-firestore",
+  "version": "0.1.0",
+  "private": true,
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "migrate": "npm run build && node lib/migrations/run.js",
+    "test": "npm run build && node --test test/*.test.js"
+  },
+  "dependencies": { "firebase-admin": "^13.0.0" },
+  "devDependencies": { "@types/node": "^22.0.0", "typescript": "^5.7.0" }
+}

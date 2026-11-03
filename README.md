@@ -37,6 +37,15 @@
 3. 데이터베이스 테이블 설계
 4. 주요 기능 구현
 
+## 프로젝트 구조
+
+- [`backend/`](./backend/): Firestore 모델, 서버 연결과 마이그레이션. 업무 API는 구현 예정입니다.
+- [`frontend/`](./frontend/): Flutter 앱을 둘 디렉터리. 앱 프로젝트는 아직 생성되지 않았습니다.
+- [`docs/`](./docs/): 기능, API, 데이터 모델과 아키텍처 설계 문서.
+- [`img/`](./img/): 화면 참고 이미지.
+
+백엔드 실행과 Firebase 설정은 [Firestore 설정 안내](./docs/firestore-setup.md)를 참고하세요.
+
 ## 설계 문서
 
 화면을 기준으로 정리한 기능 명세, API 명세, ERD, 시스템 아키텍처와 기획 결정 항목은 [설계 문서](./docs/README.md)에서 확인할 수 있습니다.
