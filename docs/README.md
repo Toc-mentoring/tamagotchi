@@ -9,6 +9,7 @@
 3. [ERD와 데이터 모델](erd.md): 엔터티 관계, Firestore 저장 경로와 무결성
 4. [시스템 아키텍처](architecture.md): 앱·서버·Firebase·헬스 데이터 연동
 5. [기획 결정 사항](open-decisions.md): 결정이 필요한 값, 임시 제안, 영향 범위
+6. [Firestore 설정](firestore-setup.md): 데이터 모델, 마이그레이션과 실행 방법
 
 ## 설계의 기준과 가정
 
