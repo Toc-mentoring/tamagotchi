@@ -18,9 +18,12 @@ class AppColors {
   static const sprig = Color(0xFFA1B88D);
 
   // 알 돌보기 · 산책 기록 (CSS 받으면 확정)
-  static const peach = Color(0xFFFCEDDF);
-  static const tan = Color(0xFFDDC39F);
-  static const barLight = Color(0xFFC6D5AF);
+    static const peach = Color(0xFFFCEDDF);
+  static const tan = Color(0xFFDCC4A1);      // 목표 달성한 날 막대
+  static const barLight = Color(0xFFC2D3AD); // 목표 못 채운 날 막대
+  static const goalLine = Color(0xFFA1B38D); // 점선 목표선
+  static const brown = Color(0xFFA08062);    // 목표 달성 카드 글자
+  static const disabled = Color(0xFFCDD3C5); // 다음 주 화살표(비활성)
 }
 
 class AppText {
