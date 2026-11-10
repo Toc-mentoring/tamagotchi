@@ -2,12 +2,23 @@
   "name": "pocketwalk-firestore",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=20" },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "migrate": "npm run build && node lib/migrations/run.js",
-    "test": "npm run build && node --test test/*.test.js"
+  "engines": {
+    "node": ">=20"
   },
-  "dependencies": { "firebase-admin": "^13.0.0" },
-  "devDependencies": { "@types/node": "^22.0.0", "typescript": "^5.7.0" }
+  "scripts": {
+  "build": "tsc -p tsconfig.json",
+  "migrate": "npm run build && node lib/migrations/run.js",
+  "test": "npm run build && node --test test/*.test.js",
+  "seed": "npm run build && node lib/dev/seed.js",
+  "dev": "npm run build && node lib/server.js"
+},
+  "dependencies": {
+    "express": "^5.3.0",
+    "firebase-admin": "^13.0.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
 }
