@@ -11,6 +11,16 @@ import { requireUser } from "../store";
 export function friendRoutes(db: Firestore) {
   const router = Router();
 
+  // GET /me/friend-code — 본인의 추가 코드와 QR용 딥링크.
+  router.get("/me/friend-code", async (_req, res) => {
+    const uid: string = res.locals.uid;
+    const user = await requireUser(db, uid);
+    send(res, {
+      friendCode: user.friendCode,
+      qrPayload: `pocketwalk://friend?code=${encodeURIComponent(user.friendCode)}`,
+    });
+  });
+
   // POST /friends — 코드로 양방향 친구 관계를 만든다.
   router.post("/friends", async (req, res) => {
     const uid: string = res.locals.uid;
