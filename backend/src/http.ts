@@ -21,8 +21,8 @@ export function requestId(_req: Request, res: Response, next: NextFunction) {
 }
 
 /** 성공 응답 { data, meta } */
-export function send(res: Response, data: unknown, status = 200) {
-  res.status(status).json({ data, meta: { requestId: res.locals.requestId } });
+export function send(res: Response, data: unknown, status = 200, extraMeta: Record<string, unknown> = {}) {
+  res.status(status).json({ data, meta: { requestId: res.locals.requestId, ...extraMeta } });
 }
 
 /**

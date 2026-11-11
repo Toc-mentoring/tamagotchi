@@ -5,6 +5,7 @@ import { connectFirestore } from "./db";
 import { ApiError, authenticate, errorHandler, requestId } from "./http";
 import { homeRoutes } from "./routes/home";
 import { meRoutes } from "./routes/me";
+import { storeRoutes } from "./routes/store";
 import { stepRoutes } from "./routes/steps";  // 2단계
 import { petRoutes } from "./routes/pets";    // 3단계
 
@@ -19,6 +20,7 @@ app.use(express.json({ limit: "16kb" }));
 const v1 = express.Router();
 v1.use(authenticate(getAuth(firebaseApp)));
 v1.use(meRoutes(db));
+v1.use(storeRoutes(db));
 v1.use(homeRoutes(db));
 v1.use(stepRoutes(db));  // 2단계
 v1.use(petRoutes(db));   // 3단계
