@@ -1,5 +1,5 @@
 # Backend
 
-Node.js/TypeScript와 Firebase Admin SDK를 사용하는 서버 데이터 계층입니다. 현재 Firestore 모델, 경로, 마이그레이션과 규칙·인덱스 설정이 있으며 업무 API 서버는 아직 구현되지 않았습니다.
+Node.js/TypeScript, Express와 Firebase Admin SDK를 사용하는 API 서버입니다. 홈·걸음 동기화 및 요약·반려동물 조회와 기본 돌봄 API가 구현되어 있습니다.
 
-설치·에뮬레이터 실행·실제 프로젝트 연결은 [Firestore 설정 안내](../docs/firestore-setup.md)를 참고하세요. 모든 npm 및 Firebase 명령은 이 디렉터리에서 실행합니다.
+Firestore 데이터베이스 설정, `.env` 구성, 로컬 에뮬레이터 및 실제 프로젝트 마이그레이션 절차는 [Firestore 설정 안내](../docs/firestore-setup.md)를 참고하세요. Firebase Admin SDK는 Application Default Credentials를 사용합니다. `.env`에는 프로젝트 ID와 환경 설정만 두고 서비스 계정 키 JSON은 넣지 마세요.
