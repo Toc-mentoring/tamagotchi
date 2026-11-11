@@ -162,7 +162,7 @@ Content-Type: application/json
 | `POST /friend-visits` | `{ "friendUid": "..." }` | `{ "visitId": "...", "friend": Friend, "pet": Friend.pet?, "canPropose": true, "newDiscovery": SpeciesEntry? }`. 방문 기록과 성체 첫 발견을 처리 |
 | `GET /friends/{friendUid}/visit` | 없음 | `{ "friend": Friend, "pet": Friend.pet?, "canPropose": true }`. 읽기 전용 새로고침. 친구가 아닌 사용자는 접근 불가. 상대의 상세 `stats` 등 비공개 필드는 반환하지 않음 |
 | `POST /gifts` | `{ "recipientUid": "...", "itemId": "carrot", "quantity": 1 }` | `{ "giftId": "...", "senderInventoryItem": InventoryItem }` |
-| `POST /proposals` | `{ "senderPetId": "...", "recipientPetId": "..." }` | `{ "proposal": Proposal }` |
+| `POST /proposals` | `{ "recipientUid": "...", "senderPetId": "...", "recipientPetId": "..." }` | `{ "proposal": Proposal }` |
 | `GET /proposals/{proposalId}` | 없음 | `{ "proposal": Proposal, "eggPreview": { "parentTraitLabels": ["잎사귀", "볼"], "isGuaranteed": false } }` |
 | `POST /proposals/{proposalId}/accept` | `{}` | `{ "proposal": Proposal, "familyId": "...", "myEgg": Pet }` |
 | `POST /proposals/{proposalId}/decline` | `{}` | `{ "proposal": Proposal }` |
