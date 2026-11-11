@@ -10,6 +10,7 @@
 4. [시스템 아키텍처](architecture.md): 앱·서버·Firebase·헬스 데이터 연동
 5. [기획 결정 사항](open-decisions.md): 결정이 필요한 값, 임시 제안, 영향 범위
 6. [Firestore 설정](firestore-setup.md): 데이터 모델, 마이그레이션과 실행 방법
+7. [4주 개발 일정](development-schedule.md): MVP 범위, 주차별 작업과 완료 기준
 
 ## 설계의 기준과 가정
 
