@@ -90,7 +90,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // ② 캐릭터 카드 (높이 238, 모서리 28)
         GestureDetector(
-          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EggScreen())),
+          onTap: pet == null
+              ? null
+              : () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => EggScreen(petId: pet.id)));
+                  _reload();
+                },
           child: ClipRRect(
             borderRadius: BorderRadius.circular(28),
             child: Container(

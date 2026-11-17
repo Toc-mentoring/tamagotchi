@@ -36,6 +36,12 @@ class Api {
   Future<HomeData> home() async => HomeData.fromJson(await _get('/home'));
 
   /// 돌보기 (FEED, CLEAN, PLAY, MEDICINE, SLEEP)
+    /// 펫 하나 (알 돌보기 화면)
+  Future<Pet> pet(String id) async => Pet.fromJson((await _get('/pets/$id'))['pet'] as Map<String, dynamic>);
+
+  /// 최근 7일 걸음 (산책 기록 화면)
+  Future<StepSummary> weekSummary() async => StepSummary.fromJson(await _get('/steps/summary?period=WEEK'));
+  
   Future<Map<String, dynamic>> care(String petId, String action) =>
       _send('POST', '/pets/$petId/care-actions', {'action': action, 'itemId': null});
 

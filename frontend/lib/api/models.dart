@@ -94,3 +94,20 @@ class HomeData {
   final Wallet wallet;
   final int unreadCount;
 }
+class StepSummary {
+  StepSummary.fromJson(Map<String, dynamic> j)
+      : startDate = j['startDate'] as String,
+        endDate = j['endDate'] as String,
+        days = (j['days'] as List).map((d) => StepDay.fromJson(d as Map<String, dynamic>)).toList(),
+        totalSteps = _int(j['totalSteps']),
+        averageSteps = _intOrNull(j['averageSteps']),
+        goalAchievedDays = _int(j['goalAchievedDays']),
+        changePercent = _intOrNull(j['previousPeriodChangePercent']);
+  final String startDate;
+  final String endDate;
+  final List<StepDay> days; // 오래된 날 → 오늘
+  final int totalSteps;
+  final int? averageSteps; // 기록이 없으면 null
+  final int goalAchievedDays;
+  final int? changePercent; // 지난주와 비교할 수 없으면 null
+}
