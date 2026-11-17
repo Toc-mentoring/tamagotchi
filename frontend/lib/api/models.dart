@@ -111,3 +111,47 @@ class StepSummary {
   final int goalAchievedDays;
   final int? changePercent; // 지난주와 비교할 수 없으면 null
 }
+class FriendPet {
+  FriendPet.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String? ?? '',
+        name = j['name'] as String,
+        stage = j['stage'] as String;
+  final String id;
+  final String name;
+  final String stage;
+
+  String get stageLabel => stageLabels[stage] ?? stage;
+  String get image => stageImages[stage] ?? stageImages['BABY']!;
+}
+
+class Friend {
+  Friend.fromJson(Map<String, dynamic> j)
+      : uid = j['uid'] as String,
+        nickname = j['nickname'] as String,
+        pet = j['pet'] == null ? null : FriendPet.fromJson(j['pet'] as Map<String, dynamic>),
+        todaySteps = _intOrNull(j['todaySteps']),
+        lastSeenAt = j['lastSeenAt'] == null ? null : DateTime.parse(j['lastSeenAt'] as String);
+  final String uid;
+  final String nickname;
+  final FriendPet? pet;
+  final int? todaySteps; // 오늘 기록이 없으면 null
+  final DateTime? lastSeenAt;
+
+  /// 방금 접속 / 15분 전 / 1시간 전 / 3일 전
+  String get lastSeenLabel {
+    if (lastSeenAt == null) return '';
+    final diff = DateTime.now().difference(lastSeenAt!);
+    if (diff.inMinutes < 5) return '방금 접속';
+    if (diff.inHours < 1) return '${diff.inMinutes}분 전';
+    if (diff.inDays < 1) return '${diff.inHours}시간 전';
+    return '${diff.inDays}일 전';
+  }
+}
+
+class FriendList {
+  FriendList.fromJson(Map<String, dynamic> j)
+      : items = (j['items'] as List).map((f) => Friend.fromJson(f as Map<String, dynamic>)).toList(),
+        totalCount = _int(j['totalCount']);
+  final List<Friend> items;
+  final int totalCount;
+}

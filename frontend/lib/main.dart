@@ -6,6 +6,7 @@ import 'screens/walk_record_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'start_gate.dart';
+import 'screens/friends_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +44,7 @@ class _MainShellState extends State<MainShell> {
   final _screens = const [
     HomeScreen(),
     ComingSoon(title: '상점'),
-    ComingSoon(title: '친구'),
+    FriendsScreen(),
     ComingSoon(title: '도감'),
     WalkRecordScreen(),
   ];

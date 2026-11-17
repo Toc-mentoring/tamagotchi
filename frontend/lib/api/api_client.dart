@@ -42,6 +42,18 @@ class Api {
   /// 최근 7일 걸음 (산책 기록 화면)
   Future<StepSummary> weekSummary() async => StepSummary.fromJson(await _get('/steps/summary?period=WEEK'));
   
+  /// 내 친구 코드
+  Future<String> friendCode() async => (await _get('/me/friend-code'))['friendCode'] as String;
+
+  /// 친구 목록
+  Future<FriendList> friends() async => FriendList.fromJson(await _get('/friends?limit=100'));
+
+  /// 친구 코드로 친구 추가
+  Future<Friend> addFriend(String code) async =>
+      Friend.fromJson((await _send('POST', '/friends', {'friendCode': code}))['friend'] as Map<String, dynamic>);
+
+  /// 친구 숲 방문 기록
+  Future<void> visitFriend(String friendUid) => _send('POST', '/friend-visits', {'friendUid': friendUid});
   Future<Map<String, dynamic>> care(String petId, String action) =>
       _send('POST', '/pets/$petId/care-actions', {'action': action, 'itemId': null});
 
