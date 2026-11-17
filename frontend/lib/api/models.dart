@@ -155,3 +155,20 @@ class FriendList {
   final List<Friend> items;
   final int totalCount;
 }
+/// 받침에 따라 조사 고르기: josa('모모', '이', '가') → '가', josa('복이', '을', '를') → '를'
+String josa(String word, String withBatchim, String withoutBatchim) {
+  if (word.isEmpty) return withoutBatchim;
+  final code = word.runes.last;
+  if (code < 0xAC00 || code > 0xD7A3) return withoutBatchim;
+  return (code - 0xAC00) % 28 != 0 ? withBatchim : withoutBatchim;
+}
+
+class FriendVisit {
+  FriendVisit.fromJson(Map<String, dynamic> j)
+      : friend = Friend.fromJson(j['friend'] as Map<String, dynamic>),
+        pet = j['pet'] == null ? null : FriendPet.fromJson(j['pet'] as Map<String, dynamic>),
+        canPropose = j['canPropose'] as bool? ?? false;
+  final Friend friend;
+  final FriendPet? pet;
+  final bool canPropose; // 둘 다 어른이면 true
+}

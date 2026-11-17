@@ -4,6 +4,7 @@ import '../api/api_client.dart';
 import '../api/models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import 'friend_visit_screen.dart';
 
 // 친구 아바타 배경색 (디자인 순서대로 돌아가며)
 const _avatarColors = [AppColors.peach, Color(0xFFF0EBF5), AppColors.primarySoft];
@@ -63,14 +64,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
     }
   }
 
-  // 놀러 가기 → 방문 기록 (친구의 작은 숲 화면은 다음 단계)
-  Future<void> _visit(Friend friend) async {
-    try {
-      await Api.instance.visitFriend(friend.uid);
-      _toast('${friend.nickname}님의 숲에 놀러 갔어요!');
-    } catch (e) {
-      _toast('$e');
-    }
+  // 놀러 가기 → 친구의 작은 숲 화면 (들어가면 방문 기록이 저장돼요)
+  void _visit(Friend friend) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => FriendVisitScreen(friend: friend)));
   }
 
   @override

@@ -53,7 +53,17 @@ class Api {
       Friend.fromJson((await _send('POST', '/friends', {'friendCode': code}))['friend'] as Map<String, dynamic>);
 
   /// 친구 숲 방문 기록
-  Future<void> visitFriend(String friendUid) => _send('POST', '/friend-visits', {'friendUid': friendUid});
+    /// 친구 숲 방문 (방문 기록 + 친구 펫 정보)
+  Future<FriendVisit> visitFriend(String friendUid) async =>
+      FriendVisit.fromJson(await _send('POST', '/friend-visits', {'friendUid': friendUid}));
+
+  /// 청혼하기
+  Future<void> propose({required String recipientUid, required String senderPetId, required String recipientPetId}) =>
+      _send('POST', '/proposals', {
+        'recipientUid': recipientUid,
+        'senderPetId': senderPetId,
+        'recipientPetId': recipientPetId,
+      });
   Future<Map<String, dynamic>> care(String petId, String action) =>
       _send('POST', '/pets/$petId/care-actions', {'action': action, 'itemId': null});
 
