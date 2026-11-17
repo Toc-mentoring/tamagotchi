@@ -3,8 +3,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'theme.dart';
 import 'screens/home_screen.dart';
 import 'screens/walk_record_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'start_gate.dart';
 
-void main() => runApp(const PocketWalkApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  runApp(const PocketWalkApp());
+}
 
 class PocketWalkApp extends StatelessWidget {
   const PocketWalkApp({super.key});
@@ -18,7 +25,7 @@ class PocketWalkApp extends StatelessWidget {
         colorSchemeSeed: AppColors.primary,
         textTheme: GoogleFonts.notoSansKrTextTheme(),
       ),
-      home: const MainShell(),
+      home: const StartGate(),
     );
   }
 }

@@ -1,7 +1,13 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import '../api/api_client.dart';
+import '../api/models.dart';
 import '../theme.dart';
-import '../mock/mock_data.dart';
 import '../widgets/common.dart';
+
+const _weekdays = ['월', '화', '수', '목', '금', '토', '일'];
+String _mmdd(String date) => '${date.substring(5, 7)}.${date.substring(8, 10)}';
 
 class WalkRecordScreen extends StatefulWidget {
   const WalkRecordScreen({super.key});
@@ -11,11 +17,40 @@ class WalkRecordScreen extends StatefulWidget {
 }
 
 class _WalkRecordScreenState extends State<WalkRecordScreen> {
-  bool _weekly = true; // 일간 / 주간
+  bool _weekly = true; // 일간 / 주간 (지금은 주간만 서버 연결)
+  late Future<StepSummary> _future = Api.instance.weekSummary();
+
+  void _reload() => setState(() => _future = Api.instance.weekSummary());
 
   @override
   Widget build(BuildContext context) {
-    final todayPercent = MockData.todaySteps / MockData.goalSteps;
+    return FutureBuilder<StepSummary>(
+      future: _future,
+      builder: (context, snap) {
+        if (snap.hasError) {
+          return Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('불러오지 못했어요\n${snap.error}', textAlign: TextAlign.center, style: AppText.caption),
+                const SizedBox(height: 12),
+                FilledButton(onPressed: _reload, child: const Text('다시 시도')),
+              ],
+            ),
+          );
+        }
+        if (!snap.hasData) return const Center(child: CircularProgressIndicator());
+        return RefreshIndicator(onRefresh: () async => _reload(), child: _body(snap.data!));
+      },
+    );
+  }
+
+  Widget _body(StepSummary s) {
+    final today = s.days.last; // 마지막 날 = 오늘
+    final goal = today.goalSteps;
+    final todaySteps = today.totalSteps ?? 0;
+    final todayPercent = goal == 0 ? 0.0 : (todaySteps / goal).clamp(0.0, 1.0).toDouble();
+    final change = s.changePercent;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(22, 0, 22, 18),
@@ -46,23 +81,24 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
         ),
         const SizedBox(height: 16),
 
-        // ③ 날짜 이동
-        const SizedBox(
+        // ③ 날짜
+        SizedBox(
           height: 40,
           child: Row(
             children: [
-              Icon(Icons.chevron_left, size: 22, color: AppColors.primary),
+              const Icon(Icons.chevron_left, size: 22, color: AppColors.disabled),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('10.27 – 11.02', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
-                    SizedBox(height: 2),
-                    Text('이번 주', style: AppText.tiny), // 문구 확인
+                    Text('${_mmdd(s.startDate)} – ${_mmdd(s.endDate)}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.text)),
+                    const SizedBox(height: 2),
+                    const Text('최근 7일', style: AppText.tiny),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, size: 22, color: AppColors.disabled),
+              const Icon(Icons.chevron_right, size: 22, color: AppColors.disabled),
             ],
           ),
         ),
@@ -78,13 +114,13 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('이번 주 걸음', style: AppText.caption), // 문구 확인
+                        const Text('이번 주 걸음', style: AppText.caption),
                         const SizedBox(height: 2),
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.baseline,
                           textBaseline: TextBaseline.alphabetic,
                           children: [
-                            Text(comma(MockData.weekTotal), style: AppText.bigNumber),
+                            Text(comma(s.totalSteps), style: AppText.bigNumber),
                             const SizedBox(width: 5),
                             const Text('걸음', style: TextStyle(fontSize: 12, color: AppColors.sub)),
                           ],
@@ -95,12 +131,15 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(color: AppColors.primarySoft, borderRadius: BorderRadius.circular(100)),
-                    child: const Text('지난주보다 ${MockData.changePercent}% ↑', style: AppText.badge),
+                    child: Text(
+                      change == null ? '지난주 비교 없음' : '지난주보다 ${change.abs()}% ${change >= 0 ? '↑' : '↓'}',
+                      style: AppText.badge,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
-              const _WeekChart(),
+              _WeekChart(days: s.days, goal: goal),
             ],
           ),
         ),
@@ -115,19 +154,19 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
                 accent: AppColors.primary,
                 icon: Icons.directions_walk,
                 title: '하루 평균',
-                value: '${comma(MockData.weekAverage)}걸음',
-                sub: '목표의 ${(MockData.weekAverage / MockData.goalSteps * 100).round()}%', // 문구 확인
+                value: s.averageSteps == null ? '-' : '${comma(s.averageSteps!)}걸음',
+                sub: s.averageSteps == null || goal == 0 ? '기록이 아직 없어요' : '목표의 ${(s.averageSteps! / goal * 100).round()}%',
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: _InsightCard(
                 color: AppColors.peach,
                 accent: AppColors.brown,
                 icon: Icons.flag_outlined,
                 title: '목표 달성',
-                value: '${MockData.goalDays}일 / 7일',
-                sub: '8천 걸음 이상 걸은 날', // 문구 확인
+                value: '${s.goalAchievedDays}일 / ${s.days.length}일',
+                sub: '${comma(goal)}걸음 이상 걸은 날',
               ),
             ),
           ],
@@ -140,7 +179,7 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
             children: [
               Row(
                 children: [
-                  Expanded(child: Text('오늘 ${comma(MockData.todaySteps)}걸음', style: AppText.section)), // 문구 확인
+                  Expanded(child: Text('오늘 ${comma(todaySteps)}걸음', style: AppText.section)),
                   Text('목표 ${(todayPercent * 100).round()}%',
                       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 ],
@@ -150,8 +189,10 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Expanded(child: Text('목표까지 ${comma(MockData.goalSteps - MockData.todaySteps)}걸음', style: AppText.caption)),
-                  const Text('+${MockData.pointsToday} P 적립', style: TextStyle(fontSize: 11, color: AppColors.primary)),
+                  Expanded(
+                    child: Text(todaySteps >= goal ? '오늘 목표 달성!' : '목표까지 ${comma(goal - todaySteps)}걸음', style: AppText.caption),
+                  ),
+                  Text('+${today.pointsEarned} P 적립', style: const TextStyle(fontSize: 11, color: AppColors.primary)),
                 ],
               ),
             ],
@@ -164,7 +205,7 @@ class _WalkRecordScreenState extends State<WalkRecordScreen> {
           children: [
             Icon(Icons.sync, size: 13, color: AppColors.sub),
             SizedBox(width: 7),
-            Expanded(child: Text('걸음 수는 휴대폰 만보기와 자동으로 동기화돼요', style: AppText.tiny)), // 문구 확인
+            Expanded(child: Text('걸음 수는 휴대폰 만보기와 자동으로 동기화돼요', style: AppText.tiny)),
           ],
         ),
       ],
@@ -203,7 +244,9 @@ class _PeriodTab extends StatelessWidget {
 
 // 주간 막대 그래프 (높이 204)
 class _WeekChart extends StatelessWidget {
-  const _WeekChart();
+  const _WeekChart({required this.days, required this.goal});
+  final List<StepDay> days;
+  final int goal;
 
   static const _base = 169.0;      // 막대 바닥 y
   static const _pxPerStep = 0.015; // 1만 걸음 = 150px
@@ -229,29 +272,30 @@ class _WeekChart extends StatelessWidget {
               ],
 
               // 목표 점선 + 라벨
-              Positioned(left: 29, right: 0, top: _y(MockData.goalSteps), child: const _DashedLine()),
+              Positioned(left: 29, right: 0, top: _y(goal), child: const _DashedLine()),
               Positioned(
                 right: w - 312,
-                top: _y(MockData.goalSteps) - 16,
+                top: _y(goal) - 16,
                 child: Container(
                   color: Colors.white,
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  child: const Text('목표 8천', style: TextStyle(fontSize: 8, color: AppColors.primary)), // 문구 확인
+                  child: Text('목표 ${comma(goal)}', style: const TextStyle(fontSize: 8, color: AppColors.primary)),
                 ),
               ),
 
-              // 막대 7개
-              for (var i = 0; i < 7; i++)
+              // 막대 (기록 없는 날은 0)
+              for (var i = 0; i < days.length && i < 7; i++)
                 Positioned(
                   left: 38 + step * i,
                   top: 0,
                   width: 33,
                   height: 204,
                   child: _Bar(
-                    label: MockData.weekLabels[i],
-                    steps: MockData.weekSteps[i],
-                    height: MockData.weekSteps[i] * _pxPerStep,
-                    isToday: i == 6,
+                    label: i == days.length - 1 ? '오늘' : _weekdays[DateTime.parse(days[i].date).weekday - 1],
+                    steps: days[i].totalSteps,
+                    goal: goal,
+                    height: math.min((days[i].totalSteps ?? 0) * _pxPerStep, 150.0), // 1만 넘으면 1만 높이
+                    isToday: i == days.length - 1,
                   ),
                 ),
             ],
@@ -264,9 +308,10 @@ class _WeekChart extends StatelessWidget {
 
 // 막대 1개 (칸 33, 막대 23)
 class _Bar extends StatelessWidget {
-  const _Bar({required this.label, required this.steps, required this.height, required this.isToday});
+  const _Bar({required this.label, required this.steps, required this.goal, required this.height, required this.isToday});
   final String label;
-  final int steps;
+  final int? steps; // 기록 없으면 null
+  final int goal;
   final double height;
   final bool isToday;
 
@@ -274,7 +319,7 @@ class _Bar extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isToday
         ? AppColors.primary
-        : (steps >= MockData.goalSteps ? AppColors.tan : AppColors.barLight);
+        : ((steps ?? 0) >= goal ? AppColors.tan : AppColors.barLight);
     final textColor = isToday ? AppColors.primary : AppColors.sub;
     final weight = isToday ? FontWeight.w700 : FontWeight.w400;
 
@@ -283,7 +328,7 @@ class _Bar extends StatelessWidget {
         // 걸음 수 (막대 위 18px)
         Positioned(
           left: 0, right: 0, top: 169 - height - 18,
-          child: Text(comma(steps), textAlign: TextAlign.center,
+          child: Text(steps == null ? '-' : comma(steps!), textAlign: TextAlign.center,
               style: TextStyle(fontSize: 9, fontWeight: weight, color: textColor)),
         ),
         // 막대 (위 7, 아래 3 둥글게)

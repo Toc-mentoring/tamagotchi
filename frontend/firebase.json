@@ -1,0 +1,1 @@
+{"flutter":{"platforms":{"android":{"default":{"projectId":"walk-tamagotchi","appId":"1:641370119578:android:c7910437a0de5dc5c5ae23","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"walk-tamagotchi","configurations":{"android":"1:641370119578:android:c7910437a0de5dc5c5ae23","web":"1:641370119578:web:52b82d1432825b97c5ae23"}}}}}}
