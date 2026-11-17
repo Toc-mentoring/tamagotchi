@@ -1,0 +1,96 @@
+// API 응답을 Dart 객체로 바꾼다 (docs/api-spec.md 공통 객체)
+
+int _int(dynamic v) => (v as num?)?.toInt() ?? 0;
+int? _intOrNull(dynamic v) => (v as num?)?.toInt();
+
+const stageLabels = {'EGG': '알', 'BABY': '아기', 'TEEN': '청소년', 'ADULT': '어른'};
+const stageImages = {
+  'EGG': 'assets/images/momo_egg.png',
+  'BABY': 'assets/images/momo_baby.png',
+  'TEEN': 'assets/images/momo_teen.png',
+  'ADULT': 'assets/images/momo_adult.png',
+};
+
+class StageProgress {
+  StageProgress.fromJson(Map<String, dynamic> j)
+      : currentSteps = _int(j['currentSteps']),
+        requiredSteps = _intOrNull(j['requiredSteps']),
+        remainingSteps = _intOrNull(j['remainingSteps']),
+        percent = _intOrNull(j['percent']),
+        nextStage = j['nextStage'] as String?;
+  final int currentSteps;
+  final int? requiredSteps;
+  final int? remainingSteps;
+  final int? percent; // 어른이면 null
+  final String? nextStage;
+}
+
+class PetStats {
+  PetStats.fromJson(Map<String, dynamic> j)
+      : satiety = _int(j['satiety']),
+        happiness = _int(j['happiness']),
+        cleanliness = _int(j['cleanliness']),
+        health = _int(j['health']);
+  final int satiety;
+  final int happiness;
+  final int cleanliness;
+  final int health;
+}
+
+class Pet {
+  Pet.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String,
+        name = j['name'] as String,
+        stage = j['stage'] as String,
+        growthSteps = _int(j['growthSteps']),
+        progress = StageProgress.fromJson(j['stageProgress'] as Map<String, dynamic>),
+        stats = j['stats'] == null ? null : PetStats.fromJson(j['stats'] as Map<String, dynamic>),
+        createdAt = DateTime.parse(j['createdAt'] as String);
+  final String id;
+  final String name;
+  final String stage; // EGG, BABY, TEEN, ADULT
+  final int growthSteps;
+  final StageProgress progress;
+  final PetStats? stats; // 알이면 null
+  final DateTime createdAt;
+
+  String get stageLabel => stageLabels[stage] ?? stage;
+  String get image => stageImages[stage] ?? stageImages['BABY']!;
+  int get days => DateTime.now().difference(createdAt).inDays + 1;
+}
+
+class StepDay {
+  StepDay.fromJson(Map<String, dynamic> j)
+      : date = j['date'] as String,
+        totalSteps = _intOrNull(j['totalSteps']),
+        goalSteps = _int(j['goalSteps']),
+        pointsEarned = _int(j['pointsEarned']),
+        isSynced = j['isSynced'] as bool? ?? false;
+  final String date;
+  final int? totalSteps; // 동기화 전이면 null
+  final int goalSteps;
+  final int pointsEarned;
+  final bool isSynced;
+}
+
+class Wallet {
+  Wallet.fromJson(Map<String, dynamic> j)
+      : balance = _int(j['balance']),
+        todayEarned = _int(j['todayEarned']);
+  final int balance;
+  final int todayEarned;
+}
+
+class HomeData {
+  HomeData.fromJson(Map<String, dynamic> j)
+      : nickname = (j['user'] as Map<String, dynamic>)['nickname'] as String,
+        pet = j['pet'] == null ? null : Pet.fromJson(j['pet'] as Map<String, dynamic>),
+        today = StepDay.fromJson(j['today'] as Map<String, dynamic>),
+        wallet = Wallet.fromJson(j['wallet'] as Map<String, dynamic>),
+        unreadCount = _int(j['unreadCount']);
+  final String nickname;
+  final Pet? pet;
+  final StepDay today;
+  final Wallet wallet;
+  final int unreadCount;
+}

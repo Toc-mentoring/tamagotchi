@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "641370119578",
+    "project_id": "walk-tamagotchi",
+    "storage_bucket": "walk-tamagotchi.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641370119578:android:c7910437a0de5dc5c5ae23",
+        "android_client_info": {
+          "package_name": "com.example.pocketwalk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzMIajVlPYqUGIn4UcnKq1th9XY51D-rw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

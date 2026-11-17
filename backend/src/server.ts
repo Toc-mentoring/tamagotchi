@@ -18,6 +18,20 @@ const firebaseApp = getApps().find(a => a.name === `pocketwalk-${projectId}`)!;
 
 const app = express();
 app.use(requestId);
+// 로컬 개발: 크롬에서 실행한 Flutter 앱(localhost)의 요청 허용
+app.use((req, res, next) => {
+  const origin = req.get("origin");
+  if (origin && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+    res.set({
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Headers": "Authorization, Content-Type, Idempotency-Key",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, PATCH, OPTIONS",
+      Vary: "Origin",
+    });
+    if (req.method === "OPTIONS") return res.sendStatus(204);
+  }
+  next();
+});
 app.use(express.json({ limit: "16kb" }));
 
 const v1 = express.Router();
