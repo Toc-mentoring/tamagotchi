@@ -4,6 +4,7 @@ import '../api/models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import 'egg_screen.dart';
+import '../steps/step_sync.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,10 +14,21 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<HomeData> _future = Api.instance.home();
+  late Future<HomeData> _future = _syncThenLoad();
   bool _busy = false; // 돌보기 요청 중이면 버튼 잠금
 
-  void _reload() => setState(() => _future = Api.instance.home());
+  void _reload() => setState(() => _future = _syncThenLoad());
+
+  // 폰 걸음을 서버에 보낸 뒤 홈 데이터 불러오기 (동기화가 실패해도 홈은 보여 준다)
+  Future<HomeData> _syncThenLoad() async {
+    try {
+      final result = await StepSync.instance.syncToday();
+      if (result != null && result.transitions.contains('HATCHED')) _toast('알이 깨어났어요!');
+    } catch (e) {
+      _toast('걸음 동기화 실패: $e');
+    }
+    return Api.instance.home();
+  }
 
   Future<void> _care(Pet pet, String action, String label) async {
     if (_busy) return;
@@ -90,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // ② 캐릭터 카드 (높이 238, 모서리 28)
         GestureDetector(
-          onTap: pet == null
+        onTap: pet == null
               ? null
               : () async {
                   await Navigator.push(context, MaterialPageRoute(builder: (_) => EggScreen(petId: pet.id)));
