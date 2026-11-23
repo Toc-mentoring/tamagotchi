@@ -106,6 +106,10 @@ class Api {
   Future<Wallet> purchase(String productId) async => Wallet.fromJson(
       (await _send('POST', '/purchases', {'productId': productId, 'quantity': 1}))['wallet'] as Map<String, dynamic>);
 
+  /// 친구에게 선물 (내 보관함에서 1개 차감)
+  Future<void> gift({required String recipientUid, required String itemId}) =>
+      _send('POST', '/gifts', {'recipientUid': recipientUid, 'itemId': itemId, 'quantity': 1});
+
   // ----- 공통 -----
 
   Future<Map<String, String>> _headers({bool write = false}) async {
