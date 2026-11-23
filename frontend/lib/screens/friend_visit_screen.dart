@@ -3,6 +3,7 @@ import '../api/api_client.dart';
 import '../api/models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
+import '../widgets/gift_sheet.dart';
 
 // 친구 숲 전용 색 (Figma)
 const _meadow = AppColors.peach;           // FCEDDF
@@ -126,7 +127,7 @@ class _FriendVisitScreenState extends State<FriendVisitScreen> {
               ),
             ),
             GestureDetector(
-              onTap: () => _toast('선물은 상점이 열리면 보낼 수 있어요'),
+              onTap: () => sendGift(context, visit.friend),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 decoration: BoxDecoration(color: AppColors.peach, borderRadius: BorderRadius.circular(14)),
@@ -166,14 +167,21 @@ class _FriendVisitScreenState extends State<FriendVisitScreen> {
                   ),
                 ),
 
-                // 내 펫 (왼쪽) · 하트 · 친구 펫 (오른쪽)
-                Positioned(left: 32, top: 42, child: _PetImage(path: myPet?.image, size: 136)),
-                const Positioned(left: 171, top: 92, child: Icon(Icons.favorite_border, size: 27, color: _heart)),
-                Positioned(left: 201, top: 42, child: _PetImage(path: friendPet?.image, size: 136)),
-
-                // 이름표
-                Positioned(left: 37, top: 182, child: _NameTag(text: '$myName · ${myPet?.stageLabel ?? '-'}')),
-                Positioned(left: 212, top: 182, child: _NameTag(text: '$friendName · ${friendPet?.stageLabel ?? '-'}')),
+                // 내 펫 (왼쪽) · 하트 · 친구 펫 (오른쪽) — 폰 너비에 맞춰 반씩 나누고, 이름표는 각 펫 바로 아래 가운데
+                Positioned.fill(
+                  top: 38,
+                  bottom: 14,
+                  child: Row(
+                    children: [
+                      Expanded(child: _PetSpot(image: myPet?.image, label: '$myName · ${myPet?.stageLabel ?? '-'}')),
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 40),
+                        child: Icon(Icons.favorite_border, size: 27, color: _heart),
+                      ),
+                      Expanded(child: _PetSpot(image: friendPet?.image, label: '$friendName · ${friendPet?.stageLabel ?? '-'}')),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -356,6 +364,24 @@ class _Ellipse extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.all(Radius.elliptical(w / 2, h / 2)),
       ),
+    );
+  }
+}
+
+// 숲 속 펫 한 마리: 그림 + 바로 아래 이름표 (가운데 정렬)
+class _PetSpot extends StatelessWidget {
+  const _PetSpot({required this.image, required this.label});
+  final String? image;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(child: Center(child: _PetImage(path: image, size: 132))),
+        const SizedBox(height: 4),
+        _NameTag(text: label),
+      ],
     );
   }
 }

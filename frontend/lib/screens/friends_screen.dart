@@ -5,6 +5,7 @@ import '../api/models.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import 'friend_visit_screen.dart';
+import '../widgets/gift_sheet.dart';
 
 // 친구 아바타 배경색 (디자인 순서대로 돌아가며)
 const _avatarColors = [AppColors.peach, Color(0xFFF0EBF5), AppColors.primarySoft];
@@ -67,89 +68,6 @@ class _FriendsScreenState extends State<FriendsScreen> {
   // 놀러 가기 → 친구의 작은 숲 화면 (들어가면 방문 기록이 저장돼요)
   void _visit(Friend friend) {
     Navigator.push(context, MaterialPageRoute(builder: (_) => FriendVisitScreen(friend: friend)));
-  }
-
-  // 선물 → 내 보관함에서 고르기 → 1개 보내기
-  Future<void> _gift(Friend friend) async {
-    List<InventoryItem> items;
-    try {
-      items = (await Api.instance.inventory()).where((i) => i.quantity > 0).toList();
-    } catch (e) {
-      _toast('$e');
-      return;
-    }
-    if (!mounted) return;
-    if (items.isEmpty) {
-      _toast('보관함이 비어 있어요. 상점에서 먼저 사 주세요');
-      return;
-    }
-    final picked = await showModalBottomSheet<InventoryItem>(
-      context: context,
-      backgroundColor: AppColors.bg,
-      showDragHandle: true,
-      builder: (context) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 0, 22, 18),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('${friend.nickname}님에게 보낼 선물',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.text)),
-              const SizedBox(height: 4),
-              const Text('하나를 고르면 1개가 바로 전달돼요', style: AppText.caption),
-              const SizedBox(height: 12),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, i) {
-                    final it = items[i];
-                    return GestureDetector(
-                      onTap: () => Navigator.pop(context, it),
-                      child: AppCard(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(color: _giftBg, borderRadius: BorderRadius.circular(12)),
-                              child: const Icon(Icons.card_giftcard, size: 20, color: _giftIcon),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(it.name, style: AppText.cardTitle),
-                                  Text(it.effectText, style: AppText.tiny),
-                                ],
-                              ),
-                            ),
-                            Text('× ${it.quantity}', style: AppText.badge),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    if (picked == null) return;
-    try {
-      await Api.instance.gift(recipientUid: friend.uid, itemId: picked.itemId);
-      _toast('${friend.nickname}님에게 ${picked.name}${josa(picked.name, '을', '를')} 보냈어요!');
-    } on ApiException catch (e) {
-      _toast(e.code == 'INSUFFICIENT_ITEMS' ? '보관함에 남은 게 없어요' : e.message);
-    } catch (e) {
-      _toast('$e');
-    }
   }
 
   @override
@@ -288,7 +206,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
               friend: shown[i],
               avatarColor: _avatarColors[i % _avatarColors.length],
               onVisit: () => _visit(shown[i]),
-              onGift: () => _gift(shown[i]),
+              onGift: () => sendGift(context, shown[i]),
             ),
           ],
         const SizedBox(height: 16),
