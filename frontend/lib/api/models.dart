@@ -182,3 +182,37 @@ class StepSyncResult {
   final int pointsGranted; // 이번에 받은 포인트
   final List<String> transitions; // HATCHED, BECAME_TEEN, BECAME_ADULT
 }
+
+/// 상점 상품
+class Product {
+  Product.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String,
+        itemId = j['itemId'] as String,
+        name = j['name'] as String,
+        category = j['category'] as String,
+        price = _int(j['price']),
+        effectText = j['effectText'] as String? ?? '',
+        available = j['available'] as bool? ?? true;
+  final String id;
+  final String itemId;
+  final String name;
+  final String category; // FOOD, RARE_EGG, TOY, MEDICINE
+  final int price;
+  final String effectText;
+  final bool available;
+}
+
+/// 보관함 아이템
+class InventoryItem {
+  InventoryItem.fromJson(Map<String, dynamic> j)
+      : itemId = j['itemId'] as String,
+        name = j['name'] as String,
+        category = j['category'] as String,
+        quantity = _int(j['quantity']),
+        effectText = j['effectText'] as String? ?? '';
+  final String itemId;
+  final String name;
+  final String category;
+  final int quantity;
+  final String effectText;
+}

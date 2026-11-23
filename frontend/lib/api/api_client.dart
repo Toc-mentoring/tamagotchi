@@ -41,6 +41,10 @@ class Api {
 
   /// 최근 7일 걸음 (산책 기록 화면)
   Future<StepSummary> weekSummary() async => StepSummary.fromJson(await _get('/steps/summary?period=WEEK'));
+
+  /// 걸음 기록 (period: DAY 또는 WEEK, endDate: YYYY-MM-DD)
+  Future<StepSummary> stepSummary({required String period, required String endDate}) async =>
+      StepSummary.fromJson(await _get('/steps/summary?period=$period&endDate=$endDate'));
   
   /// 내 친구 코드
   Future<String> friendCode() async => (await _get('/me/friend-code'))['friendCode'] as String;
@@ -88,6 +92,20 @@ class Api {
         'totalSteps': totalSteps,
         'observedAt': observedAt.toIso8601String(),
       }));
+  /// 상점 상품 목록
+  Future<List<Product>> products() async => ((await _get('/products?category=ALL'))['items'] as List)
+      .map((p) => Product.fromJson(p as Map<String, dynamic>))
+      .toList();
+
+  /// 내 보관함
+  Future<List<InventoryItem>> inventory() async => ((await _get('/inventory'))['items'] as List)
+      .map((i) => InventoryItem.fromJson(i as Map<String, dynamic>))
+      .toList();
+
+  /// 상품 1개 구매 → 남은 포인트
+  Future<Wallet> purchase(String productId) async => Wallet.fromJson(
+      (await _send('POST', '/purchases', {'productId': productId, 'quantity': 1}))['wallet'] as Map<String, dynamic>);
+
   // ----- 공통 -----
 
   Future<Map<String, String>> _headers({bool write = false}) async {
