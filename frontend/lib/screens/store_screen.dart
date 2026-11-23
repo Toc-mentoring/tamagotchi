@@ -331,7 +331,24 @@ class _InventorySheet extends StatefulWidget {
 }
 
 class _InventorySheetState extends State<_InventorySheet> {
-  final _future = Api.instance.inventory();
+  late Future<List<InventoryItem>> _future = Api.instance.inventory();
+  bool _busy = false;
+
+  // 희귀 알 사용 → 새 알 생성 (홈의 ⇄ 버튼에서 키울 아이로 바꿀 수 있음)
+  Future<void> _useEgg(InventoryItem it) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await Api.instance.createPet(it.itemId);
+      messenger.showSnackBar(const SnackBar(content: Text('새 알이 생겼어요! 홈의 ⇄ 버튼에서 키울 수 있어요')));
+      setState(() => _future = Api.instance.inventory());
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('$e')));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -389,6 +406,19 @@ class _InventorySheetState extends State<_InventorySheet> {
                                 ),
                               ),
                               Text('× ${it.quantity}', style: AppText.badge),
+                              if (it.category == 'RARE_EGG') ...[
+                                const SizedBox(width: 8),
+                                FilledButton(
+                                  onPressed: _busy ? null : () => _useEgg(it),
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    minimumSize: const Size(0, 30),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                                    textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                                  ),
+                                  child: const Text('사용'),
+                                ),
+                              ],
                             ],
                           ),
                         );

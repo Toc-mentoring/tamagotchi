@@ -110,6 +110,20 @@ class Api {
   Future<void> gift({required String recipientUid, required String itemId}) =>
       _send('POST', '/gifts', {'recipientUid': recipientUid, 'itemId': itemId, 'quantity': 1});
 
+  /// 내 아이들 목록 + 지금 키우는 아이 id
+  Future<(List<Pet>, String?)> myPets() async {
+    final data = await _get('/pets?limit=100');
+    final pets = (data['items'] as List).map((p) => Pet.fromJson(p as Map<String, dynamic>)).toList();
+    return (pets, data['activePetId'] as String?);
+  }
+
+  /// 희귀 알 사용 → 새 알 (아직 키우는 아이로 바뀌지는 않음)
+  Future<Pet> createPet(String sourceItemId) async =>
+      Pet.fromJson((await _send('POST', '/pets', {'sourceItemId': sourceItemId}))['pet'] as Map<String, dynamic>);
+
+  /// 키울 아이 바꾸기
+  Future<void> activatePet(String petId) => _send('POST', '/pets/$petId/activate', {});
+
   // ----- 공통 -----
 
   Future<Map<String, String>> _headers({bool write = false}) async {
