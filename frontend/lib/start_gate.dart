@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 
 import 'api/api_client.dart';
 import 'main.dart';
+import 'steps/step_sync.dart';
 import 'theme.dart';
 
-/// 앱 시작: 익명 로그인 → 사용자 초기화(bootstrap) → 메인 화면
+/// 앱 시작: 익명 로그인 → 사용자 초기화(bootstrap) → 기기 등록 → 메인 화면
 class StartGate extends StatefulWidget {
   const StartGate({super.key});
 
@@ -20,6 +21,7 @@ class _StartGateState extends State<StartGate> {
     final auth = FirebaseAuth.instance;
     if (auth.currentUser == null) await auth.signInAnonymously();
     await Api.instance.bootstrap('산책러'); // 닉네임 입력 화면은 나중에
+    await StepSync.instance.registerDevice(); // 폰이면 이 기기를 대표 기기로 등록 (웹은 건너뜀)
   }
 
   @override

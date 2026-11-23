@@ -23,8 +23,8 @@ class Api {
   Api._();
   static final instance = Api._();
 
-  // 크롬(웹)에서는 내 PC 주소, 안드로이드 에뮬레이터에서는 10.0.2.2가 내 PC
-  static String get baseUrl => kIsWeb ? 'http://127.0.0.1:3000/v1' : 'http://10.0.2.2:3000/v1';
+  // 웹·폰 모두 내 PC 서버 (폰은 adb reverse tcp:3000 tcp:3000 필요)
+  static String get baseUrl => 'http://127.0.0.1:3000/v1';
   final _uuid = const Uuid();
 
   // ----- 화면에서 쓰는 API -----
@@ -67,6 +67,27 @@ class Api {
   Future<Map<String, dynamic>> care(String petId, String action) =>
       _send('POST', '/pets/$petId/care-actions', {'action': action, 'itemId': null});
 
+  /// 기기 등록
+  Future<void> registerDevice(String deviceId, String platform) =>
+      _send('PUT', '/devices/$deviceId', {'platform': platform, 'pushToken': null});
+
+  /// 대표 기기 지정 (이 기기의 걸음만 서버가 받는다)
+  Future<void> setStepSource(String deviceId) => _send('PUT', '/me/step-source', {'deviceId': deviceId});
+
+  /// 그날 걸음 저장
+  Future<StepSyncResult> putSteps({
+    required String date,
+    required String deviceId,
+    required String provider,
+    required int totalSteps,
+    required DateTime observedAt,
+  }) async =>
+      StepSyncResult.fromJson(await _send('PUT', '/steps/days/$date', {
+        'deviceId': deviceId,
+        'provider': provider,
+        'totalSteps': totalSteps,
+        'observedAt': observedAt.toIso8601String(),
+      }));
   // ----- 공통 -----
 
   Future<Map<String, String>> _headers({bool write = false}) async {

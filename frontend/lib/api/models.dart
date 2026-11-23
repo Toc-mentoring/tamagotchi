@@ -172,3 +172,13 @@ class FriendVisit {
   final FriendPet? pet;
   final bool canPropose; // 둘 다 어른이면 true
 }
+
+class StepSyncResult {
+  StepSyncResult.fromJson(Map<String, dynamic> j)
+      : creditedSteps = _int(j['creditedSteps']),
+        pointsGranted = _int(j['pointsGranted']),
+        transitions = (j['transitions'] as List).cast<String>();
+  final int creditedSteps; // 이번에 새로 인정된 걸음
+  final int pointsGranted; // 이번에 받은 포인트
+  final List<String> transitions; // HATCHED, BECAME_TEEN, BECAME_ADULT
+}

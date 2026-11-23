@@ -11,6 +11,7 @@ import { proposalRoutes } from "./routes/proposals";
 import { storeRoutes } from "./routes/store";
 import { stepRoutes } from "./routes/steps";  // 2단계
 import { petRoutes } from "./routes/pets";    // 3단계
+import { deviceRoutes } from "./routes/devices";
 
 const projectId = process.env.FIREBASE_PROJECT_ID ?? "";
 const db = connectFirestore(projectId);
@@ -44,6 +45,7 @@ v1.use(storeRoutes(db));
 v1.use(homeRoutes(db));
 v1.use(stepRoutes(db));  // 2단계
 v1.use(petRoutes(db));   // 3단계
+v1.use(deviceRoutes(db));
 app.use("/v1", v1);
 
 app.use((_req, _res, next) => next(new ApiError(404, "NOT_FOUND", "없는 주소입니다.")));
