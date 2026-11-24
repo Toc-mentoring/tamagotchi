@@ -10,6 +10,8 @@
   "migrate": "npm run build && node --env-file=.env lib/migrations/run.js",
   "test": "npm run build && node --test test/*.test.js",
   "seed": "npm run build && node --env-file=.env lib/dev/seed.js",
+  "seed:catalog": "npm run build && node --env-file=.env lib/dev/seed-catalog.js",
+  "grant:points": "npm run build && node --env-file=.env lib/dev/grant-points.js",
   "dev": "npm run build && node --env-file=.env lib/server.js"
 },
   "dependencies": {

@@ -111,6 +111,68 @@ class StepSummary {
   final int goalAchievedDays;
   final int? changePercent; // 지난주와 비교할 수 없으면 null
 }
+class FriendPet {
+  FriendPet.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String? ?? '',
+        name = j['name'] as String,
+        stage = j['stage'] as String;
+  final String id;
+  final String name;
+  final String stage;
+
+  String get stageLabel => stageLabels[stage] ?? stage;
+  String get image => stageImages[stage] ?? stageImages['BABY']!;
+}
+
+class Friend {
+  Friend.fromJson(Map<String, dynamic> j)
+      : uid = j['uid'] as String,
+        nickname = j['nickname'] as String,
+        pet = j['pet'] == null ? null : FriendPet.fromJson(j['pet'] as Map<String, dynamic>),
+        todaySteps = _intOrNull(j['todaySteps']),
+        lastSeenAt = j['lastSeenAt'] == null ? null : DateTime.parse(j['lastSeenAt'] as String);
+  final String uid;
+  final String nickname;
+  final FriendPet? pet;
+  final int? todaySteps; // 오늘 기록이 없으면 null
+  final DateTime? lastSeenAt;
+
+  /// 방금 접속 / 15분 전 / 1시간 전 / 3일 전
+  String get lastSeenLabel {
+    if (lastSeenAt == null) return '';
+    final diff = DateTime.now().difference(lastSeenAt!);
+    if (diff.inMinutes < 5) return '방금 접속';
+    if (diff.inHours < 1) return '${diff.inMinutes}분 전';
+    if (diff.inDays < 1) return '${diff.inHours}시간 전';
+    return '${diff.inDays}일 전';
+  }
+}
+
+class FriendList {
+  FriendList.fromJson(Map<String, dynamic> j)
+      : items = (j['items'] as List).map((f) => Friend.fromJson(f as Map<String, dynamic>)).toList(),
+        totalCount = _int(j['totalCount']);
+  final List<Friend> items;
+  final int totalCount;
+}
+/// 받침에 따라 조사 고르기: josa('모모', '이', '가') → '가', josa('복이', '을', '를') → '를'
+String josa(String word, String withBatchim, String withoutBatchim) {
+  if (word.isEmpty) return withoutBatchim;
+  final code = word.runes.last;
+  if (code < 0xAC00 || code > 0xD7A3) return withoutBatchim;
+  return (code - 0xAC00) % 28 != 0 ? withBatchim : withoutBatchim;
+}
+
+class FriendVisit {
+  FriendVisit.fromJson(Map<String, dynamic> j)
+      : friend = Friend.fromJson(j['friend'] as Map<String, dynamic>),
+        pet = j['pet'] == null ? null : FriendPet.fromJson(j['pet'] as Map<String, dynamic>),
+        canPropose = j['canPropose'] as bool? ?? false;
+  final Friend friend;
+  final FriendPet? pet;
+  final bool canPropose; // 둘 다 어른이면 true
+}
+
 class StepSyncResult {
   StepSyncResult.fromJson(Map<String, dynamic> j)
       : creditedSteps = _int(j['creditedSteps']),
@@ -119,4 +181,38 @@ class StepSyncResult {
   final int creditedSteps; // 이번에 새로 인정된 걸음
   final int pointsGranted; // 이번에 받은 포인트
   final List<String> transitions; // HATCHED, BECAME_TEEN, BECAME_ADULT
+}
+
+/// 상점 상품
+class Product {
+  Product.fromJson(Map<String, dynamic> j)
+      : id = j['id'] as String,
+        itemId = j['itemId'] as String,
+        name = j['name'] as String,
+        category = j['category'] as String,
+        price = _int(j['price']),
+        effectText = j['effectText'] as String? ?? '',
+        available = j['available'] as bool? ?? true;
+  final String id;
+  final String itemId;
+  final String name;
+  final String category; // FOOD, RARE_EGG, TOY, MEDICINE
+  final int price;
+  final String effectText;
+  final bool available;
+}
+
+/// 보관함 아이템
+class InventoryItem {
+  InventoryItem.fromJson(Map<String, dynamic> j)
+      : itemId = j['itemId'] as String,
+        name = j['name'] as String,
+        category = j['category'] as String,
+        quantity = _int(j['quantity']),
+        effectText = j['effectText'] as String? ?? '';
+  final String itemId;
+  final String name;
+  final String category;
+  final int quantity;
+  final String effectText;
 }

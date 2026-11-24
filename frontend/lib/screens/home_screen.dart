@@ -5,6 +5,7 @@ import '../theme.dart';
 import '../widgets/common.dart';
 import 'egg_screen.dart';
 import '../steps/step_sync.dart';
+import '../widgets/pet_switch_sheet.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,6 +42,21 @@ class _HomeScreenState extends State<HomeScreen> {
       _toast('$e');
     } finally {
       if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  // 내 아이들 → 키울 아이 바꾸기
+  Future<void> _openPets() async {
+    final changed = await showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: AppColors.bg,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (_) => const PetSwitchSheet(),
+    );
+    if (changed == true) {
+      _reload();
+      _toast('키우는 아이를 바꿨어요');
     }
   }
 
@@ -94,6 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Row(
             children: [
               const Expanded(child: Text('포켓산책', style: AppText.pageTitle)),
+              CircleIconButton(icon: Icons.swap_horiz, onTap: _openPets),
+              const SizedBox(width: 8),
               CircleIconButton(icon: Icons.notifications_none, hasDot: data.unreadCount > 0),
             ],
           ),
